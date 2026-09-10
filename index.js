@@ -1,11 +1,11 @@
 const mineflayer = require('mineflayer');
 
 const bot = mineflayer.createBot({
-  host: 'IP_SERVER_HERE', // استبدل ده بأيبي سيرفر الماينكرافت
-  port: 25565,             // بورت السيرفر (افتراضي غالباً 25565)
+  host: 'Progamer-Smp.aternos.me', // استبدل ده بأيبي سيرفر الماينكرافت
+  port: 29801,             // بورت السيرفر (افتراضي غالباً 25565)
   auth: 'offline',         // نوع الدخول (offline لو السيرفر مش أصلي / کراک)
   version: '1.20.4',       // إصدار اللعبة (غيره حسب إصدار سيرفرك لو لزم)
-  username: 'AFK_Bot'      // اسم البوت جوه اللعبة
+  username: 'iam3mk'      // اسم البوت جوه اللعبة
 });
 
 bot.on('spawn', () => {
