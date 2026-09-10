@@ -1,27 +1,27 @@
 const mineflayer = require('mineflayer');
 
 const bot = mineflayer.createBot({
-  host: 'Progamer-Smp.aternos.me', // استبدل ده بأيبي سيرفرك
-  port: 29801,             // بورت السيرفر
-  auth: 'offline',         // نوع الدخول (كراتش / أوفلاين)
-  version: '1.20.4',       // إصدار سيرفرك
-  username: 'iam3mkbro'    // اسم البوت المخصص
+  host: 'Progamer-Smp.aternos.me', // أيبي السيرفر
+  port: 29801,                   // البورت
+  auth: 'offline',
+  version: '1.20.4',             // إصدار السيرفر (تقدر تغيره لو إصدارك غير كده)
+  username: 'hello'         // اسم البوت الجديد
 });
 
 bot.on('spawn', () => {
-  console.log('Bot has spawned and is now online!');
+  console.log('Bot has spawned! Registering/Logging in...');
   
-  // أول ما البوت يدخل، هيبعت أمر الدخول تلقائياً بعد ثانيتين (غير كلمة المرور دي بالكلمة السرية بتاعت الحساب)
+  // أول ما يدخل السيرفر، هيبعت أمر التسجيل تلقائي (غير كلمة السر دي باللي تعجبك)
   setTimeout(() => {
-    bot.chat('/login YOUR_PASSWORD_HERE');
-  }, 2000);
-
-  // حركة بسيطة كل 30 ثانية عشان السيرفر مايعتبركش خامل ويطردك (AFK)
-  setInterval(() => {
-    bot.setControlState('jump', true);
-    setTimeout(() => bot.setControlState('jump', false), 500);
-  }, 30000);
+    bot.chat('/register MySecurePassword123 MySecurePassword123');
+  }, 2000); // استجابة بعد ثانيتين من دخوله اللعبة
 });
+
+// حركة بسيطة لمنع الـ AFK وطرد السيرفر
+setInterval(() => {
+  bot.setControlState('jump', true);
+  setTimeout(() => bot.setControlState('jump', false), 500);
+}, 30000);
 
 bot.on('kicked', (reason) => {
   console.log(`Bot was kicked for: ${reason}`);
