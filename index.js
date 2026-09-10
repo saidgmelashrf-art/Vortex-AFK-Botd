@@ -1,21 +1,26 @@
 const mineflayer = require('mineflayer');
 
 const bot = mineflayer.createBot({
-  host: 'Progamer-Smp.aternos.me', // استبدل ده بأيبي سيرفر الماينكرافت
-  port: 29801,             // بورت السيرفر (افتراضي غالباً 25565)
-  auth: 'offline',         // نوع الدخول (offline لو السيرفر مش أصلي / کراک)
-  version: '1.20.4',       // إصدار اللعبة (غيره حسب إصدار سيرفرك لو لزم)
-  username: 'iam3mk'      // اسم البوت جوه اللعبة
+  host: 'Progamer-Smp.aternos.me', // استبدل ده بأيبي سيرفرك
+  port: 29801,             // بورت السيرفر
+  auth: 'offline',         // نوع الدخول (كراتش / أوفلاين)
+  version: '1.20.4',       // إصدار سيرفرك
+  username: 'iam3mkbro'    // اسم البوت المخصص
 });
 
 bot.on('spawn', () => {
   console.log('Bot has spawned and is now online!');
   
-  // حركة بسيطة كل شوية عشان السيرفر مايعتبركش بتعمل Spam أو طرد للخمول
+  // أول ما البوت يدخل، هيبعت أمر الدخول تلقائياً بعد ثانيتين (غير كلمة المرور دي بالكلمة السرية بتاعت الحساب)
+  setTimeout(() => {
+    bot.chat('/login YOUR_PASSWORD_HERE');
+  }, 2000);
+
+  // حركة بسيطة كل 30 ثانية عشان السيرفر مايعتبركش خامل ويطردك (AFK)
   setInterval(() => {
     bot.setControlState('jump', true);
     setTimeout(() => bot.setControlState('jump', false), 500);
-  }, 30000); // بينط كل 30 ثانية
+  }, 30000);
 });
 
 bot.on('kicked', (reason) => {
@@ -29,7 +34,6 @@ bot.on('error', (err) => {
 bot.on('end', () => {
   console.log('Bot disconnected. Reconnecting in 5 seconds...');
   setTimeout(() => {
-    // يحاول يرجع يدخل لو اتفصل
     process.exit(1); 
   }, 5000);
 });
