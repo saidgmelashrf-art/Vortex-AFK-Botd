@@ -1,39 +1,86 @@
 const mineflayer = require('mineflayer');
 
-const bot = mineflayer.createBot({
-  host: 'Progamer-Smp.aternos.me', // أيبي السيرفر
-  port: 29801,                   // البورت
+const config = {
+  host: 'Progamer-Smp.aternos.me',
+  port: 29801,
   auth: 'offline',
-  version: '1.20.4',             // إصدار السيرفر (تقدر تغيره لو إصدارك غير كده)
-  username: 'hello'         // اسم البوت الجديد
-});
+  version: '1.20.4',
+  username: 'hello',
+  password: 'MySecurePassword123'
+};
 
-bot.on('spawn', () => {
-  console.log('Bot has spawned! Registering/Logging in...');
-  
-  // أول ما يدخل السيرفر، هيبعت أمر التسجيل تلقائي (غير كلمة السر دي باللي تعجبك)
-  setTimeout(() => {
-    bot.chat('/register MySecurePassword123 MySecurePassword123');
-  }, 2000); // استجابة بعد ثانيتين من دخوله اللعبة
-});
+let bot;
 
-// حركة بسيطة لمنع الـ AFK وطرد السيرفر
-setInterval(() => {
-  bot.setControlState('jump', true);
-  setTimeout(() => bot.setControlState('jump', false), 500);
-}, 30000);
+function createBot() {
+  console.log('Starting bot...');
 
-bot.on('kicked', (reason) => {
-  console.log(`Bot was kicked for: ${reason}`);
-});
+  bot = mineflayer.createBot({
+    host: config.host,
+    port: config.port,
+    auth: config.auth,
+    version: config.version,
+    username: config.username
+  });
 
-bot.on('error', (err) => {
-  console.log('Error encountered: ', err);
-});
+  // عند دخول السيرفر
+  bot.once('spawn', () => {
+    console.log('Bot spawned successfully!');
 
-bot.on('end', () => {
-  console.log('Bot disconnected. Reconnecting in 5 seconds...');
-  setTimeout(() => {
-    process.exit(1); 
-  }, 5000);
-});
+    // الحساب مسجل بالفعل، لذلك نستخدم login
+    setTimeout(() => {
+      console.log('Sending login command...');
+      bot.chat(`/login ${config.password}`);
+    }, 3000);
+  });
+
+  // حركة بسيطة لمنع AFK
+  const jumpInterval = setInterval(() => {
+    if (bot && bot.entity) {
+      bot.setControlState('jump', true);
+
+      setTimeout(() => {
+        if (bot) {
+          bot.setControlState('jump', false);
+        }
+      }, 500);
+    }
+  }, 30000);
+
+  // سبب الطرد
+  bot.on('kicked', (reason) => {
+    console.log('================================');
+    console.log('BOT KICKED');
+    console.log('================================');
+
+    try {
+      console.log(JSON.stringify(reason, null, 2));
+    } catch (e) {
+      console.log(reason);
+    }
+
+    console.log('================================');
+  });
+
+  // الأخطاء
+  bot.on('error', (err) => {
+    console.log('================================');
+    console.log('BOT ERROR');
+    console.log('================================');
+    console.log(err);
+    console.log('================================');
+  });
+
+  // عند انقطاع الاتصال
+  bot.on('end', () => {
+    clearInterval(jumpInterval);
+
+    console.log('Bot disconnected.');
+    console.log('Reconnecting in 10 seconds...');
+
+    setTimeout(() => {
+      createBot();
+    }, 10000);
+  });
+}
+
+createBot();
