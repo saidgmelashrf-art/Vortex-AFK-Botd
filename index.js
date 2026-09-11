@@ -3,9 +3,9 @@ const mineflayer = require('mineflayer');
 const config = {
   host: 'Progamer-Smp.aternos.me',
   port: 29801,
-  username: 'bromax', // غيّر هذا الاسم إلى اسم جديد إذا أردت
+  username: 'bromax',
   password: 'MySecurePassword123',
-  version: '1.21.1', // تم التعديل إلى الإصدار الذي طلبته
+  // تم حذف سطر version ليتعرف البوت على الإصدار تلقائياً
   auth: 'offline'
 };
 
@@ -17,7 +17,7 @@ function createBot() {
   if (stopped) return;
 
   console.log('================================');
-  console.log('Starting bot...');
+  console.log('Starting bot (Auto-Detect Version)...');
   console.log(`Server: ${config.host}:${config.port}`);
   console.log(`Username: ${config.username}`);
   console.log('================================');
@@ -27,8 +27,8 @@ function createBot() {
       host: config.host,
       port: config.port,
       username: config.username,
-      version: config.version,
       auth: config.auth
+      // لا نمرر خاصية version هنا
     });
   } catch (err) {
     console.log('Failed to create bot:', err);
@@ -39,9 +39,10 @@ function createBot() {
   bot.once('spawn', () => {
     console.log('================================');
     console.log('BOT SPAWNED SUCCESSFULLY');
+    console.log(`Connected with version: ${bot.version}`);
     console.log('================================');
 
-    // الانتظار قليلاً ثم إرسال أمر التسجيل أولاً، ثم تسجيل الدخول
+    // تنفيذ أمر التسجيل ثم الدخول
     setTimeout(() => {
       if (!bot || !bot.entity) return;
 
@@ -53,11 +54,11 @@ function createBot() {
         
         console.log('Sending /login...');
         bot.chat(`/login ${config.password}`);
-      }, 1500); // الانتظار 1.5 ثانية بين التسجيل وتسجيل الدخول
+      }, 1500);
     }, 3000);
   });
 
-  // حركة كل 30 ثانية
+  // حركة كل 30 ثانية لمنع الـ AFK Kick
   const jumpInterval = setInterval(() => {
     if (!bot || !bot.entity) return;
 
@@ -77,21 +78,13 @@ function createBot() {
   bot.on('kicked', (reason) => {
     console.log('================================');
     console.log('BOT KICKED');
-    console.log('================================');
-
-    try {
-      console.log(JSON.stringify(reason, null, 2));
-    } catch {
-      console.log(reason);
-    }
-
+    console.log(JSON.stringify(reason, null, 2));
     console.log('================================');
   });
 
   bot.on('error', (err) => {
     console.log('================================');
     console.log('BOT ERROR');
-    console.log('================================');
     console.log(err);
     console.log('================================');
   });
@@ -124,33 +117,15 @@ function reconnect() {
 }
 
 process.on('SIGTERM', () => {
-  console.log('Received SIGTERM. Stopping bot...');
   stopped = true;
-
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer);
-  }
-
-  if (bot) {
-    try {
-      bot.quit();
-    } catch {}
-  }
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  if (bot) try { bot.quit(); } catch {}
 });
 
 process.on('SIGINT', () => {
-  console.log('Received SIGINT. Stopping bot...');
   stopped = true;
-
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer);
-  }
-
-  if (bot) {
-    try {
-      bot.quit();
-    } catch {}
-  }
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  if (bot) try { bot.quit(); } catch {}
 });
 
 createBot();
