@@ -3,9 +3,9 @@ const mineflayer = require('mineflayer');
 const config = {
   host: 'Progamer-Smp.aternos.me',
   port: 29801,
-  username: 'hello',
+  username: 'bromax', // غيّر هذا الاسم إلى اسم جديد إذا أردت
   password: 'MySecurePassword123',
-  version: '1.21.11',
+  version: '1.21.1', // تم التعديل إلى الإصدار الذي طلبته
   auth: 'offline'
 };
 
@@ -41,12 +41,19 @@ function createBot() {
     console.log('BOT SPAWNED SUCCESSFULLY');
     console.log('================================');
 
-    // الحساب مسجل بالفعل
+    // الانتظار قليلاً ثم إرسال أمر التسجيل أولاً، ثم تسجيل الدخول
     setTimeout(() => {
       if (!bot || !bot.entity) return;
 
-      console.log('Sending /login...');
-      bot.chat(`/login ${config.password}`);
+      console.log('Sending /register...');
+      bot.chat(`/register ${config.password} ${config.password}`);
+
+      setTimeout(() => {
+        if (!bot || !bot.entity) return;
+        
+        console.log('Sending /login...');
+        bot.chat(`/login ${config.password}`);
+      }, 1500); // الانتظار 1.5 ثانية بين التسجيل وتسجيل الدخول
     }, 3000);
   });
 
