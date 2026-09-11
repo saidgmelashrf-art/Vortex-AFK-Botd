@@ -3,50 +3,70 @@ const mineflayer = require('mineflayer');
 const config = {
   host: 'Progamer-Smp.aternos.me',
   port: 29801,
-  auth: 'offline',
-  version: '1.20.4',
   username: 'hello',
-  password: 'MySecurePassword123'
+  password: 'MySecurePassword123',
+  version: '1.20.4',
+  auth: 'offline'
 };
 
-let bot;
+let bot = null;
+let reconnectTimer = null;
+let stopped = false;
 
 function createBot() {
+  if (stopped) return;
+
+  console.log('================================');
   console.log('Starting bot...');
+  console.log(`Server: ${config.host}:${config.port}`);
+  console.log(`Username: ${config.username}`);
+  console.log('================================');
 
-  bot = mineflayer.createBot({
-    host: config.host,
-    port: config.port,
-    auth: config.auth,
-    version: config.version,
-    username: config.username
-  });
+  try {
+    bot = mineflayer.createBot({
+      host: config.host,
+      port: config.port,
+      username: config.username,
+      version: config.version,
+      auth: config.auth
+    });
+  } catch (err) {
+    console.log('Failed to create bot:', err);
+    reconnect();
+    return;
+  }
 
-  // عند دخول السيرفر
   bot.once('spawn', () => {
-    console.log('Bot spawned successfully!');
+    console.log('================================');
+    console.log('BOT SPAWNED SUCCESSFULLY');
+    console.log('================================');
 
-    // الحساب مسجل بالفعل، لذلك نستخدم login
+    // الحساب مسجل بالفعل
     setTimeout(() => {
-      console.log('Sending login command...');
+      if (!bot || !bot.entity) return;
+
+      console.log('Sending /login...');
       bot.chat(`/login ${config.password}`);
     }, 3000);
   });
 
-  // حركة بسيطة لمنع AFK
+  // حركة كل 30 ثانية
   const jumpInterval = setInterval(() => {
-    if (bot && bot.entity) {
+    if (!bot || !bot.entity) return;
+
+    try {
       bot.setControlState('jump', true);
 
       setTimeout(() => {
-        if (bot) {
+        if (bot && bot.entity) {
           bot.setControlState('jump', false);
         }
       }, 500);
+    } catch (err) {
+      console.log('Movement error:', err.message);
     }
   }, 30000);
 
-  // سبب الطرد
   bot.on('kicked', (reason) => {
     console.log('================================');
     console.log('BOT KICKED');
@@ -54,14 +74,13 @@ function createBot() {
 
     try {
       console.log(JSON.stringify(reason, null, 2));
-    } catch (e) {
+    } catch {
       console.log(reason);
     }
 
     console.log('================================');
   });
 
-  // الأخطاء
   bot.on('error', (err) => {
     console.log('================================');
     console.log('BOT ERROR');
@@ -70,17 +89,61 @@ function createBot() {
     console.log('================================');
   });
 
-  // عند انقطاع الاتصال
-  bot.on('end', () => {
+  bot.on('end', (reason) => {
     clearInterval(jumpInterval);
 
-    console.log('Bot disconnected.');
-    console.log('Reconnecting in 10 seconds...');
+    console.log('================================');
+    console.log('BOT DISCONNECTED');
+    console.log('Reason:', reason || 'Unknown');
+    console.log('================================');
 
-    setTimeout(() => {
-      createBot();
-    }, 10000);
+    reconnect();
   });
 }
+
+function reconnect() {
+  if (stopped) return;
+
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+  }
+
+  console.log('Reconnecting in 15 seconds...');
+
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    createBot();
+  }, 15000);
+}
+
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM. Stopping bot...');
+  stopped = true;
+
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+  }
+
+  if (bot) {
+    try {
+      bot.quit();
+    } catch {}
+  }
+});
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT. Stopping bot...');
+  stopped = true;
+
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+  }
+
+  if (bot) {
+    try {
+      bot.quit();
+    } catch {}
+  }
+});
 
 createBot();
