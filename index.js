@@ -5,7 +5,7 @@ const config = {
   port: 29801,
   username: 'hello',
   password: 'MySecurePassword123',
-  version: '1.20.4',
+  version: '1.21.11',
   auth: 'offline'
 };
 
